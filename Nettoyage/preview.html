@@ -1,0 +1,44 @@
+<h1>RAA Cleaner</h1>
+<h2>Présentation</h2>
+<p>RAA Cleaner V2 est un outil Python permettant le nettoyage, la normalisation et la segmentation automatique des Recueils des Actes Administratifs (RAA).</p>
+<p>L’application traite des fichiers texte issus d’OCR ou de PDF administratifs afin :
+- de corriger les erreurs d’encodage et de typographie ;
+- de restructurer le contenu ;
+- de détecter automatiquement les arrêtés ;
+- d’exporter chaque arrêté dans un fichier indépendant.</p>
+<p>Le projet a initialement été conçu comme une application web, puis transformé en outil exécutable en ligne de commande afin de faciliter les traitements batch et l’automatisation.</p>
+<hr />
+<h2>Fonctionnalités principales</h2>
+<ul>
+<li>Nettoyage OCR et Unicode ;</li>
+<li>Normalisation de la structure des documents ;</li>
+<li>Détection automatique des arrêtés administratifs ;</li>
+<li>Extraction et export des arrêtés ;</li>
+<li>Conservation du contexte administratif du RAA (en-tête et sommaire) dans chaque fichier exporté ;</li>
+<li>Pipeline modulaire de traitement.</li>
+</ul>
+<hr />
+<h2>Structure du projet</h2>
+<p><code>text
+RAA_v2/
+│
+├── main.py
+├── pipeline.py
+├── config.py
+│
+├── steps/
+│   ├── step_01_encoding.py
+│   ├── step_02_unicode.py
+│   ├── ...
+│
+├── utils/
+│   └── segmentation_arrete.py
+│
+└── output/</code></p>
+<hr />
+<h2>Exécution</h2>
+<p>Directement depuis la ligne de commande : python main.py</p>
+<hr />
+<h2>Auteurs</h2>
+<p>ALLIOUA Maïlisse
+NEVE-LESBATS Clémence</p>
