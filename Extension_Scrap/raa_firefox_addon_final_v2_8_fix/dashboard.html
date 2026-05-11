@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAA Downloader – Assistant</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+  <main class="dashboard wizard-dashboard">
+    <header class="header hero-header">
+      <div class="brand-wrap">
+        <div class="brand-mark">RAA</div>
+        <div>
+          <div class="eyebrow">Assistant multi-préfectures · v2.8</div>
+          <h1>RAA Downloader</h1><div class="hint version-line">Version finale du jour · filtrage d’année et sélection corrigés</div>
+          <div class="hint">Détection guidée : page courante → années → mois → PDF</div>
+        </div>
+      </div>
+      <div class="hero-side card subcard compact-card">
+        <div class="hero-url-label">URL analysée</div>
+        <code id="current-root-display"></code>
+      </div>
+    </header>
+
+    <section class="stats stats-6">
+      <div class="stat"><div>Années</div><div class="value" id="years-count">0</div></div>
+      <div class="stat"><div>Mois</div><div class="value" id="months-count">0</div></div>
+      <div class="stat"><div>PDF détectés</div><div class="value" id="docs-count">0</div></div>
+      <div class="stat"><div>Mois choisis</div><div class="value" id="selected-months-count">0</div></div>
+      <div class="stat"><div>PDF à télécharger</div><div class="value" id="selected-docs-count">0</div></div>
+      <div class="stat"><div>Téléchargés</div><div class="value" id="downloaded-count">0</div></div>
+    </section>
+
+    <nav class="wizard-nav card">
+      <button class="step-tab is-active" data-step="1"><span class="step-index">1</span><span>Source</span></button>
+      <button class="step-tab" data-step="2"><span class="step-index">2</span><span>Années & mois</span></button>
+      <button class="step-tab" data-step="3"><span class="step-index">3</span><span>PDF</span></button>
+      <button class="step-tab" data-step="4"><span class="step-index">4</span><span>Télécharger</span></button>
+    </nav>
+
+    <section class="wizard-body">
+      <section class="wizard-page is-active" data-step-page="1">
+        <div class="page-grid two-cols">
+          <article class="card step-panel">
+            <div class="section-head">
+              <h2>Étape 1 · Source et réglages</h2>
+              <span class="section-chip">Point de départ</span>
+            </div>
+            <div class="field">
+              <label for="root-url">URL à analyser</label>
+              <input id="root-url" type="text" placeholder="https://..." />
+              <div class="hint">Par défaut, l’extension reprend l’URL de la page sur laquelle tu l’ouvres.</div>
+            </div>
+            <div class="controls row">
+              <div class="field">
+                <label for="min-delay">Délai mini (ms)</label>
+                <input id="min-delay" type="number" min="0" step="100" />
+              </div>
+              <div class="field">
+                <label for="max-delay">Délai maxi (ms)</label>
+                <input id="max-delay" type="number" min="0" step="100" />
+              </div>
+            </div>
+            <label class="checkbox"><input id="dedupe-pdfs" type="checkbox" checked /> Dédupliquer les PDF par URL</label>
+            <label class="checkbox"><input id="only-current-origin" type="checkbox" checked /> Limiter à l’origine du site courant</label>
+            <label class="checkbox"><input id="skip-downloaded" type="checkbox" checked /> Ignorer les PDF déjà téléchargés</label>
+            <div class="button-row">
+              <button id="save-settings">Enregistrer</button>
+              <button id="analyze-btn" class="primary">Analyser cette page</button>
+            </div>
+          </article>
+
+          <article class="card step-panel subcard">
+            <div class="section-head">
+              <h2>Mode détecté</h2>
+              <span class="section-chip" id="mode-chip">En attente</span>
+            </div>
+            <div class="mode-grid">
+              <div class="mode-box"><div class="mode-title">Type de page</div><div id="page-kind">Inconnu</div></div>
+              <div class="mode-box"><div class="mode-title">Chemin cible</div><code id="folder-pattern">RAA/site/année/mois/...</code></div>
+            </div>
+            <div class="hint">L’addon sait gérer les profils classiques, les pages année directes, les collections mensuelles et les années avec PDF directs.</div>
+            <div class="wizard-actions">
+              <button class="primary next-step" data-next="2">Continuer</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="wizard-page" data-step-page="2">
+        <div class="page-grid two-cols">
+          <article class="card step-panel">
+            <div class="section-head">
+              <h2>Étape 2 · Années et mois</h2>
+              <span class="section-chip">Sélection</span>
+            </div>
+            <div class="field">
+              <label for="year-select">Année détectée</label>
+              <select id="year-select"></select>
+            </div>
+            <div class="controls row">
+              <div class="field">
+                <label for="from-month">Du mois</label>
+                <input id="from-month" type="month" />
+              </div>
+              <div class="field">
+                <label for="to-month">Au mois</label>
+                <input id="to-month" type="month" />
+              </div>
+            </div>
+            <div class="button-row">
+              <button id="apply-range-btn">Appliquer la plage</button>
+              <button id="select-all-btn">Tout sélectionner</button>
+              <button id="clear-selection-btn">Tout vider</button>
+            </div>
+            <div class="hint">Choisis l’année puis limite la période à explorer.</div>
+          </article>
+
+          <article class="card step-panel subcard">
+            <div class="section-head">
+              <h2>Arborescence</h2>
+              <span class="section-chip" id="selection-summary">0 mois</span>
+            </div>
+            <div id="tree" class="tree"></div>
+            <div class="wizard-actions">
+              <button class="prev-step" data-prev="1">Retour</button>
+              <button class="primary next-step" data-next="3">Voir les PDF</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="wizard-page" data-step-page="3">
+        <div class="page-grid two-cols wide-right">
+          <article class="card step-panel">
+            <div class="section-head">
+              <h2>Étape 3 · Inventaire PDF</h2>
+              <span class="section-chip" id="preview-chip">Prévisualisation</span>
+            </div>
+            <div id="selected-docs-preview" class="preview-list"></div>
+            <div class="wizard-actions">
+              <button class="prev-step" data-prev="2">Retour</button>
+              <button class="primary next-step" data-next="4">Préparer le téléchargement</button>
+            </div>
+          </article>
+
+          <article class="card step-panel subcard">
+            <div class="section-head">
+              <h2>Historique local</h2>
+              <span class="section-chip" id="history-count">0 fichier</span>
+            </div>
+            <div class="history-list" id="history-list"></div>
+            <div class="button-row top-gap">
+              <button id="reset-history-btn">Réinitialiser l’historique</button>
+              <button id="export-btn">Exporter le JSON</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="wizard-page" data-step-page="4">
+        <div class="page-grid two-cols wide-right">
+          <article class="card step-panel">
+            <div class="section-head">
+              <h2>Étape 4 · Téléchargement</h2>
+              <span class="section-chip">Exécution</span>
+            </div>
+            <label class="checkbox"><input id="download-pdfs" type="checkbox" /> Télécharger automatiquement après analyse</label>
+            <div class="button-row">
+              <button id="download-btn" class="primary">Télécharger la sélection</button>
+              <button id="stop-btn" disabled>Arrêter</button>
+            </div>
+            <div class="hint">Les fichiers sont rangés par site / année / mois dans le dossier des téléchargements Firefox.</div>
+            <div class="wizard-actions top-gap">
+              <button class="prev-step" data-prev="3">Retour</button>
+            </div>
+          </article>
+
+          <article class="card step-panel subcard">
+            <div class="section-head">
+              <h2>Journal technique</h2>
+              <span class="section-chip">Diagnostic</span>
+            </div>
+            <div id="log" class="log"></div>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

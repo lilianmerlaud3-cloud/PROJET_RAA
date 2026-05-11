@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "RAA Sidebar Downloader (strict)",
+  "version": "2.7.0",
+  "description": "Extension Firefox en panneau latéral avec flux strict racine RAA → année → mois → PDF.",
+  "permissions": [
+    "storage",
+    "downloads",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_title": "RAA Sidebar Downloader"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "raa-downloader@example.local",
+      "strict_min_version": "121.0"
+    }
+  }
+}

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kitty Search</title>
+
+  <style>
+    :root {
+      --bg: linear-gradient(180deg, #fff0f6 0%, #ffe4ec 45%, #fde2f3 100%);
+      --card: rgba(255, 255, 255, 0.88);
+      --card-strong: #ffffff;
+      --text: #5b325f;
+      --muted: #9a6c91;
+      --border: #f6c9db;
+      --primary: #ff4fa0;
+      --primary-dark: #e5388a;
+      --secondary: #ffd6e8;
+      --accent: #c084fc;
+      --accent-soft: #f3d9ff;
+      --peach: #ffcab0;
+      --mint: #d8f8e7;
+      --shadow: 0 14px 35px rgba(214, 99, 153, 0.16);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 182, 214, 0.55), transparent 30%),
+        radial-gradient(circle at top right, rgba(224, 170, 255, 0.35), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(255, 214, 232, 0.45), transparent 24%),
+        var(--bg);
+      padding: 28px 18px;
+    }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hero-title h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      font-weight: 800;
+      color: #c02672;
+    }
+
+    .hero-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .hero-image img {
+      width: 110px;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 16px rgba(214, 99, 153, 0.2));
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .filters-card {
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 20px;
+      color: #be185d;
+    }
+
+    .section-title span {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #9d174d;
+    }
+
+    .filter-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.95);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .filter-group input:focus {
+      border-color: #f472b6;
+      box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.18);
+      background: #fff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff4fa0, #ff70b7);
+      color: white;
+      box-shadow: 0 10px 18px rgba(255, 79, 160, 0.22);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f3d9ff, #ffd6e8);
+      color: #8b1c62;
+      border: 1px solid #efb7d3;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .result-count {
+      font-size: 14px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.65);
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid #f4c8d9;
+    }
+
+    .result-count strong {
+      color: #be185d;
+    }
+
+    .table-card {
+      overflow: hidden;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1150px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--card-strong);
+    }
+
+    thead th {
+      text-align: left;
+      padding: 16px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      color: white;
+      background: linear-gradient(135deg, #ff4fa0, #c084fc);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tbody td {
+      padding: 16px 14px;
+      font-size: 14px;
+      border-bottom: 1px solid #fde2ec;
+      vertical-align: middle;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fff8fb;
+    }
+
+    tbody tr:hover {
+      background: #fff0f7;
+    }
+
+    tbody tr {
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge-pink {
+      background: #ffd6e8;
+      color: #be185d;
+    }
+
+    .badge-purple {
+      background: #f3d9ff;
+      color: #9333ea;
+    }
+
+    .badge-peach {
+      background: #ffe3d7;
+      color: #c2410c;
+    }
+
+    .badge-mint {
+      background: #d8f8e7;
+      color: #0f766e;
+    }
+
+    .number-chip {
+      display: inline-block;
+      background: #fff0f6;
+      color: #c02672;
+      border: 1px solid #f8bfd6;
+      padding: 7px 10px;
+      border-radius: 12px;
+      font-weight: 800;
+    }
+
+    .empty {
+      display: none;
+      text-align: center;
+      padding: 34px 20px;
+      color: var(--muted);
+      background: white;
+      font-size: 15px;
+    }
+
+    .footer-note {
+      text-align: right;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .loading {
+      padding: 20px;
+      text-align: center;
+      color: #8b1c62;
+      font-weight: 700;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(91, 50, 95, 0.35);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 999;
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(180deg, #fff8fc 0%, #ffffff 100%);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(190, 24, 93, 0.18);
+      border: 1px solid #f6c9db;
+      padding: 24px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #ffe4ef;
+      color: #be185d;
+      font-size: 20px;
+      font-weight: 900;
+      border: 1px solid #f7bfd5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .modal h3 {
+      margin: 0 0 18px;
+      color: #be185d;
+      font-size: 24px;
+      padding-right: 48px;
+    }
+
+    .modal-hello {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .modal-hello img {
+      width: 95px;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .modal-block {
+      background: #fff;
+      border: 1px solid #f7d0df;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .modal-block.full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #9d174d;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .modal-value {
+      font-size: 14px;
+      line-height: 1.55;
+      color: #5b325f;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 10px;
+      }
+
+      .hero-title h1 {
+        font-size: 27px;
+      }
+
+      .filters-card {
+        padding: 18px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .actions button {
+        width: 100%;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-image img {
+        width: 85px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="hero">
+      <div class="hero-title">
+        <h1>Tableau de remontée de données</h1>
+        <p>Une interface douce, colorée et pratique pour filtrer vos actes administratifs.</p>
+      </div>
+
+      <div class="hero-image">
+        <img src="kitty.png" alt="Hello Kitty" />
+      </div>
+    </div>
+
+    <div class="card filters-card">
+      <div class="section-title">
+        <h2>Filtres de recherche</h2>
+        <span>Sélectionnez vos critères pour affiner le tableau</span>
+      </div>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label for="dateDebut">Date début</label>
+          <input type="date" id="dateDebut" />
+        </div>
+
+        <div class="filter-group">
+          <label for="dateFin">Date fin</label>
+          <input type="date" id="dateFin" />
+        </div>
+
+        <div class="filter-group">
+          <label for="auteur">Auteur</label>
+          <input type="text" id="auteur" placeholder="Ex : Jean Martin" />
+        </div>
+
+        <div class="filter-group">
+          <label for="baseLegale">Base légale</label>
+          <input type="text" id="baseLegale" placeholder="Ex : Code de l'urbanisme" />
+        </div>
+
+        <div class="filter-group">
+          <label for="objetLarge">Objet</label>
+          <input type="text" id="objetLarge" placeholder="Ex : circulation, PLU..." />
+        </div>
+
+        <div class="filter-group">
+          <label for="numeroActe">Numéro acte</label>
+          <input type="text" id="numeroActe" placeholder="Ex : 2026-001" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" onclick="filtrerDonnees()">Filtrer</button>
+        <button class="btn-secondary" onclick="reinitialiserFiltres()">Réinitialiser</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="result-count" id="resultCount"></div>
+    </div>
+
+    <div class="card table-card">
+      <div id="loading" class="loading">Chargement des données...</div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Auteur</th>
+              <th>Base légale</th>
+              <th>Objet</th>
+              <th>Numéro acte</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="emptyMessage" class="empty">Aucun résultat trouvé.</div>
+    </div>
+
+    <div class="footer-note">
+      Clique sur une ligne pour afficher le détail complet.
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="fermerPopup(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="fermerPopup()">×</button>
+
+      <h3>Détail de la demande</h3>
+
+      <div class="modal-hello">
+        <img src="kitty.png" alt="Hello Kitty" />
+      </div>
+
+      <div class="modal-grid">
+        <div class="modal-block">
+          <div class="modal-label">Date</div>
+          <div class="modal-value" id="modalDate"></div>
+        </div>
+
+        <div class="modal-block">
+          <div class="modal-label">Numéro acte</div>
+          <div class="modal-value" id="modalNumero"></div>
+        </div>
+
+        <div class="modal-block full">
+          <div class="modal-label">Auteur</div>
+          <div class="modal-value" id="modalAuteur"></div>
+        </div>
+
+        <div class="modal-block full">
+          <div class="modal-label">Base légale</div>
+          <div class="modal-value" id="modalBaseLegale"></div>
+        </div>
+
+        <div class="modal-block full">
+          <div class="modal-label">Objet</div>
+          <div class="modal-value" id="modalObjet"></div>
+        </div>
+
+        <div class="modal-block full">
+          <div class="modal-label">Contenu complet</div>
+          <div class="modal-value" id="modalContenu"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let donnees = [];
+    let donneesFiltrees = [];
+
+    // Rotation de badge par premier caractère de l'auteur → cohérent mais générique
+    function getAuteurBadgeClass(auteur) {
+      const classes = ["badge-pink", "badge-purple", "badge-peach", "badge-mint"];
+      if (!auteur) return "badge " + classes[0];
+      const index = auteur.charCodeAt(0) % classes.length;
+      return "badge " + classes[index];
+    }
+
+    function afficherDonnees(liste) {
+      const tableBody    = document.getElementById("tableBody");
+      const emptyMessage = document.getElementById("emptyMessage");
+      const resultCount  = document.getElementById("resultCount");
+      const loading      = document.getElementById("loading");
+
+      tableBody.innerHTML = "";
+      loading.style.display = "none";
+      resultCount.innerHTML = `<strong>${liste.length}</strong> résultat(s) affiché(s)`;
+
+      if (liste.length === 0) {
+        emptyMessage.style.display = "block";
+        return;
+      }
+
+      emptyMessage.style.display = "none";
+
+      liste.forEach(item => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${item.date          || "Non renseigné"}</td>
+          <td><span class="${getAuteurBadgeClass(item.auteur)}">${item.auteur || "Non renseigné"}</span></td>
+          <td>${item.base_legale   || "Non renseigné"}</td>
+          <td>${item.objet         || "Non renseigné"}</td>
+          <td><span class="number-chip">${item.numero_arrete || "Non renseigné"}</span></td>
+        `;
+
+        row.addEventListener("click", () => ouvrirPopup(item));
+        tableBody.appendChild(row);
+      });
+    }
+
+    function ouvrirPopup(item) {
+      document.getElementById("modalDate").textContent       = item.date          || "Non renseigné";
+      document.getElementById("modalAuteur").textContent     = item.auteur        || "Non renseigné";
+      document.getElementById("modalBaseLegale").textContent = item.base_legale   || "Non renseigné";
+      document.getElementById("modalObjet").textContent      = item.objet         || "Non renseigné";
+      document.getElementById("modalNumero").textContent     = item.numero_arrete || "Non renseigné";
+      document.getElementById("modalContenu").textContent    = item.contenu       || "Non renseigné";
+
+      document.getElementById("modalOverlay").style.display = "flex";
+    }
+
+    // CORRIGÉ : fermerPopup() sans argument (bouton ×) → event === undefined → on ferme
+    // fermerPopup(event) avec argument (clic overlay) → on vérifie event.target.id
+    function fermerPopup(event) {
+      if (event === undefined || event.target.id === "modalOverlay") {
+        document.getElementById("modalOverlay").style.display = "none";
+      }
+    }
+
+    function filtrerDonnees() {
+      const dateDebut  = document.getElementById("dateDebut").value;
+      const dateFin    = document.getElementById("dateFin").value;
+      const auteur     = document.getElementById("auteur").value.toLowerCase();
+      const baseLegale = document.getElementById("baseLegale").value.toLowerCase();
+      const objetLarge = document.getElementById("objetLarge").value.toLowerCase();
+      const numeroActe = document.getElementById("numeroActe").value.toLowerCase();
+
+      donneesFiltrees = donnees.filter(item => {
+        // date_acte est déjà au format YYYY-MM-DD → comparaison directe de chaînes
+        const matchDateDebut  = !dateDebut  || (item.date && item.date >= dateDebut);
+        const matchDateFin    = !dateFin    || (item.date && item.date <= dateFin);
+        const matchAuteur     = !auteur     || (item.auteur      && item.auteur.toLowerCase().includes(auteur));
+        const matchBaseLegale = !baseLegale || (item.base_legale && item.base_legale.toLowerCase().includes(baseLegale));
+        const matchObjet      = !objetLarge || (item.objet       && item.objet.toLowerCase().includes(objetLarge));
+        const matchNumero     = !numeroActe || (item.numero_arrete && item.numero_arrete.toLowerCase().includes(numeroActe));
+
+        return matchDateDebut && matchDateFin && matchAuteur && matchBaseLegale && matchObjet && matchNumero;
+      });
+
+      afficherDonnees(donneesFiltrees);
+    }
+
+    function reinitialiserFiltres() {
+      document.getElementById("dateDebut").value  = "";
+      document.getElementById("dateFin").value    = "";
+      document.getElementById("auteur").value     = "";
+      document.getElementById("baseLegale").value = "";
+      document.getElementById("objetLarge").value = "";
+      document.getElementById("numeroActe").value = "";
+
+      donneesFiltrees = [...donnees];
+      afficherDonnees(donneesFiltrees);
+    }
+
+    async function chargerDonnees() {
+      const loading = document.getElementById("loading");
+
+      try {
+        loading.textContent = "Chargement des données...";
+
+        const response = await fetch("api_donnees.php");
+
+        if (!response.ok) {
+          throw new Error("Erreur HTTP : " + response.status);
+        }
+
+        const json = await response.json();
+
+        console.log("Données reçues :", json);
+
+        // Gestion du success: false renvoyé par le PHP en cas d'erreur BDD
+        if (json.success === false) {
+          loading.textContent = "Erreur serveur : impossible de charger les données.";
+          console.error("Erreur API :", json.erreur);
+          return;
+        }
+
+        donnees = json.raa_exemples || [];
+        donneesFiltrees = [...donnees];
+
+        afficherDonnees(donneesFiltrees);
+
+      } catch (error) {
+        loading.textContent = "Erreur : impossible de charger les données.";
+        console.error("Erreur JS :", error);
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") {
+        document.getElementById("modalOverlay").style.display = "none";
+      }
+    });
+
+    chargerDonnees();
+  </script>
+</body>
+</html>
